@@ -17,7 +17,7 @@ class RestaurantDetailProvider extends ChangeNotifier {
   String _message = '';
   String get message => _message;
 
-  RestaurantDetailResult? get result => _restaurantDetailResult;
+  RestaurantDetailResult get result => _restaurantDetailResult;
   ResultState get state => _state;
 
   Future<dynamic> fetchRestaurantDetails(String id) async {
@@ -27,9 +27,11 @@ class RestaurantDetailProvider extends ChangeNotifier {
       final restaurant = await apiService.detailRestaurant(id);
       if (restaurant.restaurant == null) {
         _state = ResultState.noData;
+        notifyListeners();
         _message = 'Empty Data';
       } else {
         _state = ResultState.hasData;
+        notifyListeners();
         _restaurantDetailResult = restaurant;
       }
     } catch (e) {

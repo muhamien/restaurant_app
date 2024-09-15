@@ -46,11 +46,19 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 class _HomeScreenState extends State<HomeScreen> {
   List<Restaurant> topRatedRestaurants = [];
   List<Restaurant> suggestedRestaurants = [];
+  List<Restaurant> restaurantResults = [];
   bool loading = true;
+  bool searchActive = false;
+  String? keywords;
 
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -73,7 +81,11 @@ class _HomeScreenState extends State<HomeScreen> {
               SliverToBoxAdapter(
                 child: Container(
                   margin: const EdgeInsets.only(top: 16),
-                  child: _buildContentContainer(),
+                  child: Column(
+                    children: [
+                      _buildContentContainer(),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -122,7 +134,38 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   );
                 default:
-                  return Center(child: Text(provider.message));
+                  return Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    color: Colors.white,
+                    child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.signal_wifi_off,
+                          size: 100,
+                          color: Colors.black54,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          "You are offline",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          "Please check your connection",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black,
+                          ),
+                        )
+                      ],
+                    ),
+                  );
               }
             },
           ),
@@ -177,15 +220,20 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Row(
             children: [
-              Container(
-                decoration: BoxDecoration(
-                    color: Colors.white38,
-                    borderRadius: BorderRadius.circular(24)),
-                padding: const EdgeInsets.all(8),
-                child: const Icon(
-                  Icons.search,
-                  color: Colors.white,
-                  size: 20,
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, Routes.searchRestaurant);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.white38,
+                      borderRadius: BorderRadius.circular(24)),
+                  padding: const EdgeInsets.all(8),
+                  child: const Icon(
+                    Icons.search,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
               ),
               const SizedBox(
@@ -277,7 +325,38 @@ class _HomeScreenState extends State<HomeScreen> {
         } else if (provider.state == ResultState.noData) {
           return Center(child: Text(provider.message));
         } else if (provider.state == ResultState.error) {
-          return Center(child: Text(provider.message));
+          return Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            color: Colors.white,
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.signal_wifi_off,
+                  size: 100,
+                  color: Colors.black54,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  "You are offline",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  "Please check your connection",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+          );
         } else {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,13 +406,13 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Stack(
                 children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(18),
-                      topRight: Radius.circular(18),
-                    ),
-                    child: Hero(
-                      tag: restaurant.pictureId.toString(),
+                  Hero(
+                    tag: "top-rated-${restaurant.pictureId.toString()}",
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(18),
+                        topRight: Radius.circular(18),
+                      ),
                       child: Image.network(
                         '${ApiService.getBaseUrl()}/images/medium/${restaurant.pictureId}',
                         height: 120,
@@ -481,7 +560,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Hero(
-                tag: restaurant.pictureId.toString(),
+                tag: "suggested-item-${restaurant.pictureId}",
                 child: Image.network(
                   '${ApiService.getBaseUrl()}/images/medium/${restaurant.pictureId}',
                   width: 120,

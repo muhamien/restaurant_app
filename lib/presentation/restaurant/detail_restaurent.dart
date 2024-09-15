@@ -54,9 +54,65 @@ class DetailRestaurantScreenState extends State<DetailRestaurantScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildImageView(),
-                const SizedBox(height: 18),
-                _buildDetailView(),
+                Consumer<RestaurantDetailProvider>(
+                  builder: (context, provider, child) {
+                    switch (provider.state) {
+                      case ResultState.loading:
+                        return SizedBox(
+                          height: MediaQuery.of(context).size.height,
+                          child: Column(
+                            children: [
+                              _buildImageView(),
+                              const Expanded(
+                                  child: Center(
+                                      child: CircularProgressIndicator())),
+                            ],
+                          ),
+                        );
+                      case ResultState.hasData:
+                        return Column(
+                          children: [
+                            _buildImageView(),
+                            const SizedBox(height: 18),
+                            _buildDetailView(),
+                          ],
+                        );
+                      default:
+                        return Container(
+                          height: MediaQuery.of(context).size.height,
+                          width: MediaQuery.of(context).size.width,
+                          color: Colors.white,
+                          child: const Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.signal_wifi_off,
+                                size: 100,
+                                color: Colors.black54,
+                              ),
+                              SizedBox(height: 16),
+                              Text(
+                                "You are offline",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              Text(
+                                "Please check your connection",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black,
+                                ),
+                              )
+                            ],
+                          ),
+                        );
+                    }
+                  },
+                ),
               ],
             ),
           ),
@@ -67,18 +123,30 @@ class DetailRestaurantScreenState extends State<DetailRestaurantScreen> {
 
   Widget _buildImageView() {
     return Hero(
-      tag: widget.restaurant.pictureId.toString(),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-        child: Image.network(
-          '${ApiService.getBaseUrl()}/images/medium/${widget.restaurant.pictureId}',
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: 300,
-        ),
+      tag: "suggested-item-${widget.restaurant.pictureId}",
+      child: Stack(
+        children: [
+          Container(
+            height: 300,
+            decoration: const BoxDecoration(
+                borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            )),
+          ),
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+            child: Image.network(
+              '${ApiService.getBaseUrl()}/images/medium/${widget.restaurant.pictureId}',
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: 300,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -93,6 +161,7 @@ class DetailRestaurantScreenState extends State<DetailRestaurantScreen> {
           _buildCityInfo(),
           _buildRestaurantName(),
           _buildRestaurantDescription(),
+          _buildCustomerReview(),
           _buildMenuList()
         ],
       ),
@@ -100,23 +169,50 @@ class DetailRestaurantScreenState extends State<DetailRestaurantScreen> {
   }
 
   Widget _buildCityInfo() {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-          decoration: const BoxDecoration(
-            color: Colors.black12,
-            borderRadius: BorderRadius.all(Radius.circular(8)),
+    return Consumer<RestaurantDetailProvider>(
+        builder: (context, provider, child) {
+      final detail = provider.result.restaurant;
+      final categories = detail!.categories;
+      return Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+            decoration: const BoxDecoration(
+              color: Colors.black12,
+              borderRadius: BorderRadius.all(Radius.circular(8)),
+            ),
+            child: Text(
+              widget.restaurant.city,
+              style: const TextStyle(color: Colors.black),
+            ),
           ),
-          child: Text(
-            widget.restaurant.city,
-            style: const TextStyle(color: Colors.black),
-          ),
-        ),
-        const SizedBox(width: 8),
-        _buildRatingAndMenuInfo(),
-      ],
-    );
+          categories!.isNotEmpty
+              ? Row(
+                  children: [
+                    const SizedBox(width: 8),
+                    ...categories.map((item) {
+                      return Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 4, horizontal: 16),
+                        decoration: const BoxDecoration(
+                          color: Colors.black12,
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        ),
+                        child: Text(
+                          item.name,
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                      );
+                    }),
+                  ],
+                )
+              : const SizedBox(),
+          const SizedBox(width: 8),
+          _buildRatingAndMenuInfo(),
+        ],
+      );
+    });
   }
 
   Widget _buildRestaurantName() {
@@ -165,41 +261,32 @@ class DetailRestaurantScreenState extends State<DetailRestaurantScreen> {
   }
 
   Widget _buildMenuList() {
-    return Consumer<RestaurantDetailProvider>(
-      builder: (context, provider, child) {
-        if (provider.state == ResultState.loading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (provider.state == ResultState.hasData) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(left: 16.0, right: 16.0, top: 16),
-                child: Text(
-                  "Menu",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-                ),
-              ),
-              _buildFoodList(),
-              _buildDrinkList(),
-            ],
-          );
-        }
-        return Center(child: Text(provider.message));
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(top: 16),
+          child: Text(
+            "Menu",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+          ),
+        ),
+        _buildFoodList(),
+        _buildDrinkList(),
+      ],
     );
   }
 
   Widget _buildFoodList() {
     return Consumer<RestaurantDetailProvider>(
       builder: (context, provider, child) {
-        var foods = provider.result!.restaurant?.menus?.foods ?? [];
+        final foods = provider.result.restaurant!.menus?.foods ?? [];
         if (foods.isNotEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
                 child: Text(
                   "Foods",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -222,13 +309,13 @@ class DetailRestaurantScreenState extends State<DetailRestaurantScreen> {
   Widget _buildDrinkList() {
     return Consumer<RestaurantDetailProvider>(
       builder: (context, provider, child) {
-        var drinks = provider.result!.restaurant?.menus?.drinks ?? [];
+        var drinks = provider.result.restaurant!.menus?.drinks ?? [];
         if (drinks.isNotEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
                 child: Text(
                   "Drinks",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -244,6 +331,52 @@ class DetailRestaurantScreenState extends State<DetailRestaurantScreen> {
           );
         }
         return const SizedBox();
+      },
+    );
+  }
+
+  Widget _buildCustomerReview() {
+    return Consumer<RestaurantDetailProvider>(
+      builder: (context, provider, child) {
+        final reviews = provider.result.restaurant!.customerReview ?? [];
+        if (reviews.isNotEmpty) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  "Customer Reviews",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                ),
+              ),
+              ...reviews.map((review) {
+                return ListTile(
+                  leading: const Icon(Icons.person, color: Colors.grey),
+                  title: Text(review.name),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(review.review),
+                      Text(
+                        review.date, // Assuming review.date is a String
+                        style: const TextStyle(
+                            fontSize: 12, color: Colors.black54),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          );
+        }
+        return const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+          child: Text(
+            "No reviews yet.",
+            style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+          ),
+        );
       },
     );
   }

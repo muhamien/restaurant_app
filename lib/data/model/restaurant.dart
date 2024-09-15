@@ -1,13 +1,11 @@
 class RestaurantResult {
   bool error;
   String message;
-  int count;
   List<Restaurant>? restaurants;
 
   RestaurantResult({
     required this.error,
     required this.message,
-    required this.count,
     this.restaurants,
   });
 
@@ -15,32 +13,53 @@ class RestaurantResult {
       RestaurantResult(
         error: json["error"],
         message: json["message"],
-        count: json["count"],
-        restaurants: List<Restaurant>.from(
-          json["restaurants"].map((x) => Restaurant.fromJson(x)),
-        ),
+        restaurants: json["restaurants"] != null
+            ? List<Restaurant>.from(
+                json["restaurants"].map((x) => Restaurant.fromJson(x)),
+              )
+            : null,
       );
 }
 
 class RestaurantDetailResult {
   bool error;
   String message;
-  int count;
-  Restaurant? restaurant;
+  Restaurant restaurant;
 
   RestaurantDetailResult({
     required this.error,
     required this.message,
-    required this.count,
-    this.restaurant,
+    required this.restaurant,
   });
 
   factory RestaurantDetailResult.fromJson(Map<String, dynamic> json) =>
       RestaurantDetailResult(
         error: json["error"],
         message: json["message"],
-        count: json["count"],
-        restaurant: json["restaurant"],
+        restaurant: Restaurant.fromJson(json["restaurant"]),
+      );
+}
+
+class RestaurantSearchResult {
+  bool error;
+  int founded;
+  List<Restaurant>? restaurants;
+
+  RestaurantSearchResult({
+    required this.error,
+    required this.founded,
+    this.restaurants,
+  });
+
+  factory RestaurantSearchResult.fromJson(Map<String, dynamic> json) =>
+      RestaurantSearchResult(
+        error: json["error"],
+        founded: json["founded"],
+        restaurants: json["restaurants"] != null
+            ? List<Restaurant>.from(
+                json["restaurants"].map((x) => Restaurant.fromJson(x)),
+              )
+            : null,
       );
 }
 
@@ -51,9 +70,9 @@ class Restaurant {
   String pictureId;
   String city;
   double rating;
-  CategoryRestaurant? categories;
+  List<CategoryRestaurant>? categories;
   Menus? menus;
-  CustomerReview? customerReview;
+  List<CustomerReview>? customerReview;
 
   Restaurant({
     required this.id,
@@ -74,6 +93,17 @@ class Restaurant {
         pictureId: json["pictureId"],
         city: json["city"],
         rating: json["rating"]?.toDouble(),
+        categories: json["categories"] != null
+            ? List<CategoryRestaurant>.from(
+                json["categories"].map((x) => CategoryRestaurant.fromJson(x)))
+            : null,
+        menus: json["menus"] != null
+            ? Menus.fromJson(json["menus"]) // Parse menus properly
+            : null,
+        customerReview: json["customerReviews"] != null
+            ? List<CustomerReview>.from(
+                json["customerReviews"].map((x) => CustomerReview.fromJson(x)))
+            : null,
       );
 }
 
