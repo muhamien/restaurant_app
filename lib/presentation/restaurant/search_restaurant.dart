@@ -126,7 +126,7 @@ class _SearchRestaurantScreenState extends State<SearchRestaurantScreen> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                keywords != '' && keywords != null
+                keywords != ''
                     ? Text(
                         "for \"$keywords\" ${restaurantSearchResults.isEmpty ? "is not found!" : ""}",
                         style: const TextStyle(

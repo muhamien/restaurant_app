@@ -46,7 +46,6 @@ class _FavoriteScreenState extends State<FavoriteScreen>{
                 icon: const Icon(Icons.refresh, size: 28, color: Colors.white),
                 onPressed: () {
                   provider.getAllFavorites();
-                  setState(() {});
                 },
               );
             }

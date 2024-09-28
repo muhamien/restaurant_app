@@ -1,11 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
+import 'package:restaurant_app/provider/app_provider.dart';
 import 'package:restaurant_app/provider/scheduling_provider.dart';
-import 'package:restaurant_app/utils/notification_helper.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingScreen extends StatefulWidget{
   const SettingScreen({super.key});
@@ -15,29 +12,11 @@ class SettingScreen extends StatefulWidget{
 }
 
 class _SettingScreenState extends State<SettingScreen>{
-  static const String scheduleNotificationPref = 'scheduleNotification';
-
-  final NotificationHelper _notificationHelper = NotificationHelper();
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   
-  bool _isNotificationScheduled = false;
-
   @override
   void initState() {
     super.initState();
-    _loadSettingPrefs();
-  }
-
-  void _settingPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setBool(scheduleNotificationPref, _isNotificationScheduled);
-  }
-
-  void _loadSettingPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _isNotificationScheduled = prefs.getBool(scheduleNotificationPref) ?? false;
-    });
   }
 
   @override
@@ -67,18 +46,22 @@ class _SettingScreenState extends State<SettingScreen>{
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text("Schedule Notification", style: TextStyle(fontSize: 18.0),),
-                  ChangeNotifierProvider<SchedulingProvider>(
-                    create: (_) => SchedulingProvider(),
-                    child: Consumer<SchedulingProvider>(
-                      builder: (context, scheduled, _) {
+                  MultiProvider(
+                    providers: [
+                      ChangeNotifierProvider<SchedulingProvider>(
+                        create: (_) => SchedulingProvider(),
+                      ),
+                      ChangeNotifierProvider<AppProvider>(
+                        create: (_) => AppProvider(),
+                      ),
+                    ],
+                    child: Consumer2<SchedulingProvider, AppProvider>(
+                      builder: (context, schedulingProvider, appProvider, _) {
                         return Switch.adaptive(
-                          value: _isNotificationScheduled,
+                          value: appProvider.isNotificationScheduled,
                           onChanged: (value) async {
-                            scheduled.scheduledNews(value);
-                            setState(() {
-                              _settingPrefs();
-                              _isNotificationScheduled = value;
-                            });
+                            appProvider.setNotificationSchedule(value);
+                            schedulingProvider.scheduledNews(value);
                           },
                         );
                       },

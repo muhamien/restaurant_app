@@ -79,7 +79,7 @@ class Restaurant {
   String city;
   double rating;
   List<CategoryRestaurant>? categories;
-  Menus? menus;
+  Menu? menu;
   List<CustomerReview>? customerReview;
 
   Restaurant({
@@ -90,7 +90,7 @@ class Restaurant {
     required this.city,
     required this.rating,
     this.categories,
-    this.menus,
+    this.menu,
     this.customerReview,
   });
 
@@ -105,8 +105,8 @@ class Restaurant {
             ? List<CategoryRestaurant>.from(
                 json["categories"].map((x) => CategoryRestaurant.fromJson(x)))
             : null,
-        menus: json["menus"] != null
-            ? Menus.fromJson(json["menus"]) // Parse menus properly
+        menu: json["menu"] != null
+            ? Menu.fromJson(json["menu"]) // Parse menu properly
             : null,
         customerReview: json["customerReviews"] != null
             ? List<CustomerReview>.from(
@@ -125,7 +125,7 @@ class Restaurant {
       "categories": categories != null
           ? List<dynamic>.from(categories!.map((x) => x.toJson()))
           : null,
-      "menus": menus?.toJson(),
+      "menu": menu?.toJson(),
       "customerReviews": customerReview != null
           ? List<dynamic>.from(customerReview!.map((x) => x.toJson()))
           : null,
@@ -174,16 +174,16 @@ class CustomerReview {
   }
 }
 
-class Menus {
+class Menu {
   final List<MenuItem> foods;
   final List<MenuItem> drinks;
 
-  Menus({
+  Menu({
     required this.foods,
     required this.drinks,
   });
 
-  factory Menus.fromJson(Map<String, dynamic> json) {
+  factory Menu.fromJson(Map<String, dynamic> json) {
     var foodsFromJson = json['foods'] as List;
     var drinksFromJson = json['drinks'] as List;
 
@@ -192,7 +192,7 @@ class Menus {
     List<MenuItem> drinkList =
         drinksFromJson.map((i) => MenuItem.fromJson(i)).toList();
 
-    return Menus(
+    return Menu(
       foods: foodList,
       drinks: drinkList,
     );

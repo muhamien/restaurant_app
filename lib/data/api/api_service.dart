@@ -8,29 +8,29 @@ class ApiService {
 
   Future<RestaurantResult> listRestaurant() async {
     final response = await http.get(Uri.parse("${_baseUrl}list"));
-    if (response.statusCode == 200) {
+    try {
       return RestaurantResult.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to load restaurant list');
+    } catch(e) {
+      throw Exception('Error $e');
     }
   }
 
   Future<RestaurantDetailResult> detailRestaurant(String id) async {
     final response = await http.get(Uri.parse("${_baseUrl}detail/$id"));
-    if (response.statusCode == 200) {
+    try {
       return RestaurantDetailResult.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to load restaurant detail');
+    } catch(e) {
+      throw Exception('Error $e');
     }
   }
 
   Future<RestaurantSearchResult> searchRestaurant(String keywords) async {
     final response =
-        await http.get(Uri.parse("${_baseUrl}search?q=${keywords ?? ''}"));
-    if (response.statusCode == 200) {
+      await http.get(Uri.parse("${_baseUrl}search?q=${keywords ?? ''}"));
+    try {
       return RestaurantSearchResult.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to load restaurant search result');
+    } catch(e) {
+      throw Exception('Error $e');
     }
   }
 

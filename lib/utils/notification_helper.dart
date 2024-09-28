@@ -71,11 +71,12 @@ class NotificationHelper {
       iOS: iOSPlatformChannelSpecifics,
     );
 
-    var titleNotification = "<b>Check out this restaurant</b>";
-    var titleNews = restaurants.restaurants![0].name;
+    var titleNotification = "<b>Check out this amazing restaurant!</b>";
+    var randomRestaurantIndex = Random().nextInt(restaurants.restaurants!.length);
+    var restaurantName = restaurants.restaurants![randomRestaurantIndex].name;
 
     await flutterLocalNotificationsPlugin.show(
-        0, titleNotification, titleNews, platformChannelSpecifics,
+        0, titleNotification, restaurantName, platformChannelSpecifics,
         payload: json.encode(restaurants.toJson()));
   }
 
