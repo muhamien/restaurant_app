@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:restaurant_app/data/api/api_service.dart';
 import 'package:restaurant_app/data/model/restaurant.dart';
 import 'package:restaurant_app/provider/restaurant_provider.dart';
+import 'package:restaurant_app/utils/notification_helper.dart';
 import 'package:restaurant_app/utils/routes.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -50,14 +51,17 @@ class _HomeScreenState extends State<HomeScreen> {
   bool loading = true;
   bool searchActive = false;
   String? keywords;
+  final NotificationHelper _notificationHelper = NotificationHelper();
 
   @override
   void initState() {
     super.initState();
+    _notificationHelper.configureSelectNotificationSubject(Routes.detailRestaurant);
   }
 
   @override
   void dispose() {
+    selectNotificationSubject.close();
     super.dispose();
   }
 
@@ -239,15 +243,39 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(
                 width: 8,
               ),
-              Container(
-                decoration: BoxDecoration(
-                    color: Colors.white38,
-                    borderRadius: BorderRadius.circular(24)),
-                padding: const EdgeInsets.all(8),
-                child: const Icon(
-                  Icons.notifications,
-                  color: Colors.white,
-                  size: 20,
+              GestureDetector(
+                onTap: (){
+                  Navigator.pushNamed(context, Routes.favorite);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.white38,
+                      borderRadius: BorderRadius.circular(24)),
+                  padding: const EdgeInsets.all(8),
+                  child: const Icon(
+                    Icons.favorite_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
+              const SizedBox(
+                width: 8,
+              ),
+              GestureDetector(
+                onTap: (){
+                  Navigator.pushNamed(context, Routes.setting);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.white38,
+                      borderRadius: BorderRadius.circular(24)),
+                  padding: const EdgeInsets.all(8),
+                  child: const Icon(
+                    Icons.settings,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
               ),
             ],
@@ -421,27 +449,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          margin: const EdgeInsets.all(8),
-                          padding: const EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            color: Colors.black26,
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: const Icon(
-                            Icons.favorite_outline_rounded,
-                            size: 18,
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
                 ],
               ),
               Padding(

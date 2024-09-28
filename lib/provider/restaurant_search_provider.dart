@@ -43,8 +43,7 @@ class RestaurantSearchProvider extends ChangeNotifier {
 
 
   void setKeywords(String newKeywords) async{
-    // if (newKeywords == keywords) return;
-    print("setKeywords");
+    if (newKeywords == keywords) return;
     keywords = newKeywords;
     await searchRestaurant();
   }

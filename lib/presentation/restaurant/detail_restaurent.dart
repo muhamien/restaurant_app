@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:restaurant_app/data/api/api_service.dart';
+import 'package:restaurant_app/data/model/favorite.dart';
 import 'package:restaurant_app/data/model/restaurant.dart';
+import 'package:restaurant_app/provider/db_provider.dart';
 import 'package:restaurant_app/provider/restaurant_detail_provider.dart';
 
 class DetailRestaurantScreen extends StatefulWidget {
@@ -17,6 +19,7 @@ class DetailRestaurantScreenState extends State<DetailRestaurantScreen> {
   List<MenuItem> foods = [];
   List<MenuItem> drinks = [];
   bool loading = true;
+  bool isFavorite = false;
 
   @override
   void initState() {
@@ -24,12 +27,24 @@ class DetailRestaurantScreenState extends State<DetailRestaurantScreen> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<RestaurantDetailProvider>(
-      create: (_) => RestaurantDetailProvider(
-        apiService: ApiService(),
-        id: widget.restaurant.id,
-      ),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<RestaurantDetailProvider>(
+          create: (_) => RestaurantDetailProvider(
+            apiService: ApiService(),
+            id: widget.restaurant.id,
+          ),
+        ),
+        ChangeNotifierProvider<DBProvider>(
+          create: (_) => DBProvider(),
+        ),
+      ],
       child: Scaffold(
         appBar: AppBar(
           title: Align(
@@ -46,6 +61,40 @@ class DetailRestaurantScreenState extends State<DetailRestaurantScreen> {
             icon: const Icon(Icons.chevron_left, size: 38, color: Colors.white),
             onPressed: () => Navigator.of(context).pop(),
           ),
+          actions: [
+            Consumer<DBProvider>(
+              builder: (context, provider, child) {
+                isFavorite = provider.favorites.any((favorite) => favorite.id == widget.restaurant.id);
+                return IconButton(
+                  icon: Icon(
+                    Icons.favorite,
+                    size: 28,
+                    color: isFavorite ? Colors.red : Colors.white,
+                  ),
+                  onPressed: () {
+                    final favorite = Favorite(
+                      id: widget.restaurant.id,
+                      name: widget.restaurant.name,
+                      description: widget.restaurant.description,
+                      pictureId: widget.restaurant.pictureId,
+                      city: widget.restaurant.city,
+                      rating: widget.restaurant.rating,
+                    );
+
+                    if (isFavorite) {
+                      provider.deleteFavorite(widget.restaurant.id);
+                    } else {
+                      provider.addFavorite(favorite);
+                    }
+
+                    setState(() {
+                      isFavorite = !isFavorite; 
+                    });
+                  },
+                );
+              },
+            ),
+          ],
           backgroundColor: Colors.black,
         ),
         body: SafeArea(
@@ -172,7 +221,7 @@ class DetailRestaurantScreenState extends State<DetailRestaurantScreen> {
     return Consumer<RestaurantDetailProvider>(
         builder: (context, provider, child) {
       final detail = provider.result.restaurant;
-      final categories = detail!.categories;
+      final categories = detail.categories;
       return Row(
         children: [
           Container(
@@ -280,7 +329,7 @@ class DetailRestaurantScreenState extends State<DetailRestaurantScreen> {
   Widget _buildFoodList() {
     return Consumer<RestaurantDetailProvider>(
       builder: (context, provider, child) {
-        final foods = provider.result.restaurant!.menus?.foods ?? [];
+        final foods = provider.result.restaurant.menus?.foods ?? [];
         if (foods.isNotEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -309,7 +358,7 @@ class DetailRestaurantScreenState extends State<DetailRestaurantScreen> {
   Widget _buildDrinkList() {
     return Consumer<RestaurantDetailProvider>(
       builder: (context, provider, child) {
-        var drinks = provider.result.restaurant!.menus?.drinks ?? [];
+        var drinks = provider.result.restaurant.menus?.drinks ?? [];
         if (drinks.isNotEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -338,7 +387,7 @@ class DetailRestaurantScreenState extends State<DetailRestaurantScreen> {
   Widget _buildCustomerReview() {
     return Consumer<RestaurantDetailProvider>(
       builder: (context, provider, child) {
-        final reviews = provider.result.restaurant!.customerReview ?? [];
+        final reviews = provider.result.restaurant.customerReview ?? [];
         if (reviews.isNotEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
