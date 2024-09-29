@@ -106,9 +106,9 @@ class _SearchRestaurantScreenState extends State<SearchRestaurantScreen> {
                         onChanged: (query) {
                           if (_debounce?.isActive ?? false) _debounce?.cancel();
                           _debounce = Timer(const Duration(milliseconds: 500), () {
-                            setState(() {
-                              keywords = query;
-                            });
+                            // setState(() {
+                            //   keywords = query;
+                            // });
                             provider.setKeywords(query);
                           });
                         },
@@ -126,21 +126,26 @@ class _SearchRestaurantScreenState extends State<SearchRestaurantScreen> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                keywords != ''
-                    ? Text(
-                        "for \"$keywords\" ${restaurantSearchResults.isEmpty ? "is not found!" : ""}",
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      )
-                    : const Text(
-                        "Enter your keywords",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
+                Consumer<RestaurantSearchProvider>(
+                  builder: (context, provider, _) {
+                    final currentKeywords = provider.currentKeywords;
+                    return currentKeywords.isNotEmpty
+                        ? Text(
+                            "for \"$currentKeywords\" ${provider.result?.restaurants?.isEmpty ?? true ? "is not found!" : ""}",
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          )
+                        : const Text(
+                            "Enter your keywords",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          );
+                  },
+                ),
               ],
             ),
           ),
@@ -188,8 +193,6 @@ class _SearchRestaurantScreenState extends State<SearchRestaurantScreen> {
                         ]),
                   ),
                 );
-              case ResultState.error:
-                return const Text("err");
               default:
                 return const Expanded(
                   child: Center(

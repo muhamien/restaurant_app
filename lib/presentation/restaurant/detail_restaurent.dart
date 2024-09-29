@@ -86,10 +86,6 @@ class DetailRestaurantScreenState extends State<DetailRestaurantScreen> {
                     } else {
                       provider.addFavorite(favorite);
                     }
-
-                    setState(() {
-                      isFavorite = !isFavorite; 
-                    });
                   },
                 );
               },
@@ -329,7 +325,7 @@ class DetailRestaurantScreenState extends State<DetailRestaurantScreen> {
   Widget _buildFoodList() {
     return Consumer<RestaurantDetailProvider>(
       builder: (context, provider, child) {
-        final foods = provider.result.restaurant.menu?.foods ?? [];
+        final foods = provider.result.restaurant.menus?.foods ?? [];
         if (foods.isNotEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -358,7 +354,7 @@ class DetailRestaurantScreenState extends State<DetailRestaurantScreen> {
   Widget _buildDrinkList() {
     return Consumer<RestaurantDetailProvider>(
       builder: (context, provider, child) {
-        var drinks = provider.result.restaurant.menu?.drinks ?? [];
+        var drinks = provider.result.restaurant.menus?.drinks ?? [];
         if (drinks.isNotEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,

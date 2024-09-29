@@ -17,6 +17,7 @@ class RestaurantSearchProvider extends ChangeNotifier {
   String _message = '';
 
   String get message => _message;
+  String get currentKeywords => keywords;
 
   RestaurantSearchResult? get result => _restaurantSearchResult;
   ResultState get state => _state;

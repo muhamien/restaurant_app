@@ -79,7 +79,7 @@ class Restaurant {
   String city;
   double rating;
   List<CategoryRestaurant>? categories;
-  Menu? menu;
+  Menu? menus;
   List<CustomerReview>? customerReview;
 
   Restaurant({
@@ -90,7 +90,7 @@ class Restaurant {
     required this.city,
     required this.rating,
     this.categories,
-    this.menu,
+    this.menus,
     this.customerReview,
   });
 
@@ -105,8 +105,8 @@ class Restaurant {
             ? List<CategoryRestaurant>.from(
                 json["categories"].map((x) => CategoryRestaurant.fromJson(x)))
             : null,
-        menu: json["menu"] != null
-            ? Menu.fromJson(json["menu"]) // Parse menu properly
+        menus: json["menus"] != null
+            ? Menu.fromJson(json["menus"])
             : null,
         customerReview: json["customerReviews"] != null
             ? List<CustomerReview>.from(
@@ -125,7 +125,7 @@ class Restaurant {
       "categories": categories != null
           ? List<dynamic>.from(categories!.map((x) => x.toJson()))
           : null,
-      "menu": menu?.toJson(),
+      "menus": menus?.toJson(),
       "customerReviews": customerReview != null
           ? List<dynamic>.from(customerReview!.map((x) => x.toJson()))
           : null,
